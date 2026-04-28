@@ -1,77 +1,237 @@
-<header>
-  <h2 class="header__title">
-    {{ shop.name | link_to: routes.root_url }}
-  </h2>
+{% comment %}
+  ============================================================
+  sections/site-header.liquid
+  FIX: Uses <script defer> instead of script_tag filter
+       to resolve ParserBlockingScript theme-check error
+  ============================================================
+{% endcomment %}
 
-  <div class="header__menu">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
+<header class="sh" id="site-header" role="banner">
+  <div class="sh__inner">
+    {%- comment -%} ── Logo ── {%- endcomment -%}
+    <a href="{{ routes.root_url }}" class="sh__logo" aria-label="{{ shop.name }}">
+      {%- if section.settings.logo != blank -%}
+        <img
+          src="{{ section.settings.logo | image_url: width: 240 }}"
+          alt="{{ section.settings.logo.alt | default: shop.name }}"
+          width="{{ section.settings.logo_width }}"
+          height="auto"
+          loading="eager"
+        >
+      {%- else -%}
+        <span class="sh__logo-text">{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+
+    {%- comment -%} ── Right Actions ── {%- endcomment -%}
+    <div class="sh__actions">
+      {%- comment -%} Desktop nav links (shown when menu style = inline) {%- endcomment -%}
+      {%- if section.settings.nav_style == 'inline' -%}
+        <nav class="sh__inline-nav" aria-label="Primary">
+          <ul role="list">
+            {%- for link in linklists[section.settings.menu].links -%}
+              <li>
+                <a
+                  href="{{ link.url }}"
+                  class="sh__nav-link{% if link.active %} is-active{% endif %}"
+                  {% if link.active %}
+                    aria-current="page"
+                  {% endif %}
+                >
+                  {{ link.title }}
+                  <span class="sh__nav-line" aria-hidden="true"></span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      {%- comment -%} Optional language selector ── {%- endcomment -%}
+      {%- if section.settings.show_locale and localization.available_languages.size > 1 -%}
+        <div class="sh__locale">
+          {%- form 'localization' -%}
+            <select
+              name="locale_code"
+              class="sh__locale-select"
+              onchange="this.form.submit()"
+              aria-label="Language"
+            >
+              {%- for lang in localization.available_languages -%}
+                <option
+                  value="{{ lang.iso_code }}"
+                  {% if lang.iso_code == localization.language.iso_code %}
+                    selected
+                  {% endif %}
+                >
+                  {{ lang.iso_code | upcase }}
+                </option>
+              {%- endfor -%}
+            </select>
+          {%- endform -%}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Cart icon ── {%- endcomment -%}
+      {%- if section.settings.show_cart -%}
+        <a
+          href="{{ routes.cart_url }}"
+          class="sh__icon-btn sh__cart"
+          aria-label="Cart ({{ cart.item_count }})"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          >
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          {%- if cart.item_count > 0 -%}
+            <span class="sh__badge">{{ cart.item_count }}</span>
+          {%- endif -%}
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} MENU toggle button ── {%- endcomment -%}
+      <button
+        class="sh__menu-btn"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="sh-drawer"
+        data-sh-toggle
+      >
+        <span class="sh__menu-label">MENU</span>
+        <span class="sh__menu-bars" aria-hidden="true"> <span></span><span></span> </span>
+      </button>
+    </div>
   </div>
 
-  <div class="header__icons">
-    {% if shop.customer_accounts_enabled %}
-      <shopify-account menu="{{ section.settings.customer_account_menu }}">
-        {{ 'icon-account.svg' | inline_asset_content }}
-      </shopify-account>
-    {% endif %}
+  {%- comment -%} ── Full-screen Drawer Nav ── {%- endcomment -%}
+  <div
+    class="sh__drawer"
+    id="sh-drawer"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Navigation"
+  >
+    <div class="sh__drawer-inner">
+      <button class="sh__drawer-close" aria-label="Close menu" data-sh-toggle>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        >
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
 
-    <a href="{{ routes.cart_url }}">
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
-      {% endif %}
+      <nav aria-label="Main navigation">
+        <ul class="sh__drawer-list" role="list">
+          {%- for link in linklists[section.settings.menu].links -%}
+            <li class="sh__drawer-item">
+              <a href="{{ link.url }}" class="sh__drawer-link">
+                <span class="sh__drawer-num">
+                  {%- assign n = forloop.index -%}
+                  {{ n | prepend: '0' | slice: -2, 2 }}
+                </span>
+                <span class="sh__drawer-title">{{ link.title }}</span>
+                <span class="sh__drawer-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
 
-      {{ 'icon-cart.svg' | inline_asset_content }}
-    </a>
+      {%- if section.settings.drawer_subtext != blank -%}
+        <p class="sh__drawer-sub">{{ section.settings.drawer_subtext }}</p>
+      {%- endif -%}
+    </div>
   </div>
 </header>
 
-{% stylesheet %}
-  header {
-    height: 5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  header a {
-    position: relative;
-    text-decoration: none;
-    color: var(--color-foreground);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  header a sup {
-    position: absolute;
-    left: 100%;
-    overflow: hidden;
-    max-width: var(--page-margin);
-  }
-  header svg {
-    width: 2rem;
-  }
-  header .header__menu,
-  header .header__icons {
-    display: flex;
-    gap: 1rem;
-  }
-{% endstylesheet %}
-
 {% schema %}
 {
-  "name": "t:general.header",
+  "name": "Site Header",
+  "tag": "div",
+  "class": "site-header-wrapper",
   "settings": [
     {
-      "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
+      "type": "header",
+      "content": "Branding"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 60,
+      "max": 220,
+      "step": 4,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
     },
     {
       "type": "link_list",
-      "id": "customer_account_menu",
-      "label": "t:labels.customer_account_menu",
-      "default": "customer-account-main-menu"
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "select",
+      "id": "nav_style",
+      "label": "Desktop nav style",
+      "options": [
+        { "value": "drawer", "label": "MENU button only" },
+        { "value": "inline", "label": "Inline links + MENU" }
+      ],
+      "default": "drawer"
+    },
+    {
+      "type": "header",
+      "content": "Icons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart",
+      "label": "Show cart icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_locale",
+      "label": "Show language selector",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Drawer"
+    },
+    {
+      "type": "textarea",
+      "id": "drawer_subtext",
+      "label": "Drawer bottom text",
+      "default": "Always sustainable. Always premium."
     }
-  ]
+  ],
+  "presets": [{ "name": "Site Header" }]
 }
 {% endschema %}

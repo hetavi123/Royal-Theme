@@ -1,0 +1,253 @@
+/* ═══════════════════════════════════════
+   EISLAB HERO — CSS
+═══════════════════════════════════════ */
+
+.eislab-hero {
+    position: relative;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: #fbfaf9;
+    z-index: 50;
+    pointer-events: none;
+    display: none;
+}
+
+.hero-loading .js-title {
+    opacity: 0 !important;
+}
+
+/* ── LEFT PANEL ─────────────────────────────── */
+.hero-left {
+    width: 50%;
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: 140px;
+    font-weight: 900;
+    line-height: 86%;
+    color: #1c1b4f;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    position: relative;
+    z-index: 100;
+    text-align: center;
+    will-change: transform;
+}
+
+.hero-line {
+    display: block;
+    overflow: visible;
+    padding-bottom: 0.04em;
+}
+
+.hero-line-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+}
+
+.hero-line--spoon {
+    overflow: visible;
+}
+
+.hero-line--spoon .hero-line-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    will-change: gap;
+}
+
+/* ── SPOON SLOT ─────────────────────────────── */
+.hero-spoon-slot {
+    width: 0;
+    height: 120px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    will-change: width;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-spoon-img {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    will-change: opacity, transform;
+}
+
+/* ── DESCRIPTION ────────────────────────────── */
+.hero-desc {
+    margin-top: auto;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #1c1456;
+    font-weight: 400;
+    max-width: 380px;
+    opacity: 0;
+    transform: translateY(14px);
+    position: relative;
+    z-index: 100;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── RIGHT PANEL ─────────────────────────────── */
+.hero-right {
+    width: 50%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    /* clips layers as they slide off-screen */
+}
+
+/* ── IMAGE — sits at z-index 1, behind all layers ── */
+.hero-img,
+.js-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    /* GSAP starts it hidden and reveals it */
+}
+
+/* ── COLOUR LAYERS ──────────────────────────────
+   All layers are FULL WIDTH + FULL HEIGHT, anchored
+   at left:0. GSAP translateX positions each one.
+
+   Entry:  x = panelW  (off-screen right)
+           → x = i * STRIP_W  (stacked thin strips)
+   Exit:   x = i * STRIP_W → x = -panelW (off-screen left)
+
+   z-index order (1=lowest, 5=highest):
+     Higher-z layers sit on top and naturally hide
+     all but the left STRIP_W of each lower-z layer,
+     creating the thin rainbow-strip effect.
+─────────────────────────────────────────────── */
+.hero-layers {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.hero-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+}
+
+.hero-layer:nth-child(1) {
+    background: #ede5f8;
+    z-index: 1;
+}
+
+.hero-layer:nth-child(2) {
+    background: #ec8fd8;
+    z-index: 2;
+}
+
+.hero-layer:nth-child(3) {
+    background: #f8e575;
+    z-index: 3;
+}
+
+.hero-layer:nth-child(4) {
+    background: #1c1b4f;
+    z-index: 4;
+}
+
+/* dark navy     */
+
+/* ── MOBILE ──────────────────────────────────── */
+@media (max-width: 900px) {
+
+    .eislab-hero {
+        flex-direction: column;
+        height: auto;
+        min-height: 100svh;
+    }
+
+    .hero-overlay {
+        display: none !important;
+    }
+
+    .hero-left {
+        width: 100%;
+        padding: 60px 24px 36px;
+        order: 2;
+    }
+
+    .hero-title {
+        font-size: clamp(52px, 10vw, 90px);
+        text-align: left !important;
+    }
+
+    .hero-line-inner span span {
+        transform: none !important;
+        opacity: 1 !important;
+    }
+
+    .hero-line--spoon .hero-line-inner {
+        justify-content: flex-start;
+        gap: 12px !important;
+    }
+
+    .hero-spoon-slot {
+        width: 72px !important;
+        height: 72px !important;
+    }
+
+    .hero-spoon-img {
+        width: 72px !important;
+        height: 72px !important;
+        opacity: 1 !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+    .hero-desc {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .hero-layers {
+        display: none;
+    }
+
+    .hero-right {
+        width: 100%;
+        height: 52vw;
+        min-height: 240px;
+        order: 1;
+    }
+
+    .hero-img {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+    }
+}

@@ -1,0 +1,383 @@
+    /* ============================================================
+    assets/site-header.css
+    EISLAB-inspired header — minimal, cream bg, bold MENU btn
+    ============================================================ */
+
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap');
+
+    /* ── Tokens ──────────────────────────────────────────────── */
+    :root {
+        --sh-cream: #F5F0E8;
+        --sh-navy: #1B1B6B;
+        --sh-dark: #111111;
+        --sh-muted: rgba(17, 17, 17, 0.45);
+        --sh-h: 64px;
+        --sh-h-sm: 56px;
+        --sh-ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --font-display: 'Bebas Neue', sans-serif;
+        --font-body: 'Inter', sans-serif;
+    }
+
+    /* ── Reset ───────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header shell ─────────────────────────────────────────── */
+    .site-header-wrapper {
+        position: relative;
+        z-index: 300;
+    }
+
+    .sh {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 300;
+        height: var(--sh-h);
+        display: flex;
+        align-items: center;
+
+        /* Start transparent over hero */
+        background: transparent;
+        transition:
+            background 0.5s var(--sh-ease),
+            height 0.4s var(--sh-ease),
+            box-shadow 0.4s var(--sh-ease);
+    }
+
+    /* Scrolled: cream bg */
+    .sh.is-scrolled {
+        height: var(--sh-h-sm);
+        background: var(--sh-cream);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    /* ── Inner layout ─────────────────────────────────────────── */
+    .sh__inner {
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 clamp(16px, 4vw, 48px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+    }
+
+    /* ── Logo ─────────────────────────────────────────────────── */
+    .sh__logo {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        flex-shrink: 0;
+        transition: opacity 0.25s;
+    }
+
+    .sh__logo img {
+        display: block;
+        height: 28px;
+        width: auto;
+    }
+
+    .sh__logo-text {
+        font-family: var(--font-display);
+        font-size: 24px;
+        letter-spacing: 0.04em;
+        color: var(--sh-dark);
+    }
+
+    /* ── Actions row ──────────────────────────────────────────── */
+    .sh__actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ── Inline nav (optional) ────────────────────────────────── */
+    .sh__inline-nav ul {
+        display: flex;
+        gap: 32px;
+        list-style: none;
+        margin-right: 16px;
+    }
+
+    .sh__nav-link {
+        position: relative;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--sh-muted);
+        padding: 4px 0;
+        transition: color 0.3s;
+    }
+
+    .sh__nav-link:hover,
+    .sh__nav-link.is-active {
+        color: var(--sh-dark);
+    }
+
+    .sh__nav-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: var(--sh-navy);
+        clip-path: inset(0 100% 0 0);
+        transition: clip-path 0.4s var(--sh-ease);
+    }
+
+    .sh__nav-link:hover .sh__nav-line,
+    .sh__nav-link.is-active .sh__nav-line {
+        clip-path: inset(0 0% 0 0);
+    }
+
+    /* ── Language selector ────────────────────────────────────── */
+    .sh__locale {
+        border: 1.5px solid var(--sh-dark);
+        border-radius: 2px;
+    }
+
+    .sh__locale-select {
+        appearance: none;
+        background: transparent;
+        border: none;
+        font-family: var(--font-body);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        color: var(--sh-dark);
+        padding: 6px 10px;
+        cursor: pointer;
+    }
+
+    /* ── Cart icon ────────────────────────────────────────────── */
+    .sh__icon-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        text-decoration: none;
+        color: var(--sh-dark);
+        border-radius: 2px;
+        transition: background 0.2s;
+    }
+
+    .sh__icon-btn:hover {
+        background: rgba(0, 0, 0, 0.06);
+    }
+
+    .sh__badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 14px;
+        height: 14px;
+        background: var(--sh-navy);
+        color: #fff;
+        font-size: 8px;
+        font-weight: 700;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ── MENU button ──────────────────────────────────────────── */
+    .sh__menu-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: transparent;
+        border: 1.5px solid var(--sh-dark);
+        border-radius: 2px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-family: var(--font-body);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--sh-dark);
+        transition: background 0.25s, color 0.25s;
+    }
+
+    .sh__menu-btn:hover {
+        background: var(--sh-dark);
+        color: var(--sh-cream);
+    }
+
+    .sh__menu-btn:hover .sh__menu-bars span {
+        background: var(--sh-cream);
+    }
+
+    .sh__menu-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .sh__menu-bars span {
+        display: block;
+        width: 16px;
+        height: 1.5px;
+        background: currentColor;
+        border-radius: 1px;
+        transition: transform 0.35s var(--sh-ease), opacity 0.3s;
+    }
+
+    /* Open state */
+    .sh__menu-btn[aria-expanded="true"] .sh__menu-label {
+        display: none;
+    }
+
+    .sh__menu-btn[aria-expanded="true"] .sh__menu-bars span:nth-child(1) {
+        transform: translateY(2.75px) rotate(45deg);
+    }
+
+    .sh__menu-btn[aria-expanded="true"] .sh__menu-bars span:nth-child(2) {
+        transform: translateY(-2.75px) rotate(-45deg);
+    }
+
+
+    /* ── Full-screen drawer ───────────────────────────────────── */
+    .sh__drawer {
+        position: fixed;
+        inset: 0;
+        z-index: 290;
+        background: var(--sh-cream);
+        display: flex;
+        align-items: stretch;
+
+        /* Clip-path curtain reveal */
+        clip-path: inset(0 0 100% 0);
+        transition: clip-path 0.6s var(--sh-ease);
+        pointer-events: none;
+    }
+
+    .sh__drawer.is-open {
+        clip-path: inset(0 0 0% 0);
+        pointer-events: auto;
+    }
+
+    .sh__drawer-inner {
+        position: relative;
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: clamp(80px, 12vh, 140px) clamp(16px, 6vw, 80px) 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .sh__drawer-close {
+        position: absolute;
+        top: 20px;
+        right: clamp(16px, 4vw, 48px);
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1.5px solid rgba(0, 0, 0, 0.15);
+        border-radius: 2px;
+        cursor: pointer;
+        color: var(--sh-dark);
+        transition: background 0.2s;
+    }
+
+    .sh__drawer-close:hover {
+        background: rgba(0, 0, 0, 0.07);
+    }
+
+    /* Drawer nav list */
+    .sh__drawer-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .sh__drawer-item {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .sh__drawer-link {
+        display: flex;
+        align-items: baseline;
+        gap: 20px;
+        text-decoration: none;
+        padding: 20px 0;
+        color: var(--sh-dark);
+        transition: padding-left 0.35s var(--sh-ease), color 0.3s;
+    }
+
+    .sh__drawer-link:hover {
+        padding-left: 12px;
+        color: var(--sh-navy);
+    }
+
+    .sh__drawer-num {
+        font-family: var(--font-body);
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--sh-muted);
+        letter-spacing: 0.1em;
+        flex-shrink: 0;
+    }
+
+    .sh__drawer-title {
+        font-family: var(--font-display);
+        font-size: clamp(32px, 6vw, 64px);
+        letter-spacing: 0.02em;
+        line-height: 1;
+        flex: 1;
+    }
+
+    .sh__drawer-arrow {
+        font-size: 20px;
+        opacity: 0;
+        transform: translateX(-8px);
+        transition: opacity 0.3s, transform 0.3s var(--sh-ease);
+    }
+
+    .sh__drawer-link:hover .sh__drawer-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .sh__drawer-sub {
+        font-size: 13px;
+        color: var(--sh-muted);
+        letter-spacing: 0.06em;
+        max-width: 360px;
+    }
+
+    /* ── Mobile ───────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+        .sh__inline-nav {
+            display: none;
+        }
+
+        .sh__locale-select {
+            padding: 6px 8px;
+        }
+    }

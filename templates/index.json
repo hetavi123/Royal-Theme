@@ -1,20 +1,14 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
-    "main": {
-      "type": "hello-world",
-      "settings": {}
+    "hero": {
+      "type": "hero-section",
+      "settings": {
+        "eyebrow": "New Collection",
+        "heading": "Crafted for the Bold",
+        "cta_primary_label": "Shop Now",
+        "cta_primary_url": "/collections/all"
+      }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": [ "hero"]
 }

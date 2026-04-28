@@ -1,0 +1,110 @@
+<section class="eislab-hero">
+  <div class="hero-overlay js-overlay"></div>
+
+  <div class="hero-left">
+    <h1 class="hero-title js-title">
+      <span class="hero-line">
+        <span class="hero-line-inner js-li">{{ section.settings.line1 | upcase }}</span>
+      </span>
+
+      <span class="hero-line hero-line--spoon">
+        <span class="hero-line-inner js-li js-spoon-flex">
+          <span>{{ section.settings.line2_before | upcase }}</span>
+          <span class="hero-spoon-slot js-spoon-slot">
+            {% if section.settings.spoon_image %}
+              <img
+                class="hero-spoon-img js-spoon-img"
+                src="{{ section.settings.spoon_image | image_url: width: 300 }}"
+                alt="Spoon image"
+                width="150"
+                height="120"
+                aria-hidden="true"
+              >
+            {% else %}
+              <img
+                class="hero-spoon-img js-spoon-img"
+                src="{{ section.settings.spoon_image_url }}"
+                alt="Spoon image"
+                width="150"
+                height="120"
+                aria-hidden="true"
+              >
+            {% endif %}
+          </span>
+          <span>{{ section.settings.line2_after | upcase }}</span>
+        </span>
+      </span>
+
+      <span class="hero-line">
+        <span class="hero-line-inner js-li">{{ section.settings.line3 | upcase }}</span>
+      </span>
+
+      <span class="hero-line">
+        <span class="hero-line-inner js-li">{{ section.settings.line4 | upcase }}</span>
+      </span>
+    </h1>
+
+    <p class="hero-desc js-desc">{{ section.settings.text }}</p>
+  </div>
+
+  <div class="hero-right js-right">
+    <!--
+      5 color layers — wipe IN left→right (light to dark),
+      then wipe OUT left→right (dark to light), revealing the image.
+      Colors go from lightest to darkest brand tones.
+    -->
+    <div class="hero-layers" aria-hidden="true">
+      <div class="hero-layer"></div>
+      <div class="hero-layer"></div>
+      <div class="hero-layer"></div>
+      <div class="hero-layer"></div>
+    </div>
+
+    {% if section.settings.image %}
+      <img
+        src="{{ section.settings.image | image_url: width: 1400 }}"
+        srcset="
+          {{ section.settings.image | image_url: width: 800 }} 800w,
+          {{ section.settings.image | image_url: width: 1400 }} 1400w
+        "
+        sizes="50vw"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}"
+        alt="{{ section.settings.image.alt | default: 'Hero' }}"
+        class="hero-img js-img"
+        loading="eager"
+      >
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Eislab Hero",
+  "settings": [
+    { "type": "header", "content": "Title Lines" },
+    { "type": "text", "id": "line1", "label": "Line 1", "default": "WHERE EVERY" },
+    { "type": "text", "id": "line2_before", "label": "Line 2 — before image", "default": "SPOON" },
+    { "type": "text", "id": "line2_after", "label": "Line 2 — after image", "default": "IS" },
+    { "type": "text", "id": "line3", "label": "Line 3", "default": "A JOYFUL" },
+    { "type": "text", "id": "line4", "label": "Line 4", "default": "JOURNEY" },
+    { "type": "header", "content": "Spoon Image (150×150)" },
+    { "type": "image_picker", "id": "spoon_image", "label": "Upload spoon image" },
+    {
+      "type": "text",
+      "id": "spoon_image_url",
+      "label": "Or paste external URL",
+      "default": "https://images.prismic.io/eislab-admin/ZzeBYq8jQArT07Re_CANDY.png?auto=format%2Ccompress&width=300"
+    },
+    { "type": "header", "content": "Content" },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Description",
+      "default": "EISLAB - an unparalleled ice cream experience. Always sustainable, always premium."
+    },
+    { "type": "image_picker", "id": "image", "label": "Right side image" }
+  ],
+  "presets": [{ "name": "Eislab Hero" }]
+}
+{% endschema %}

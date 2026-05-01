@@ -1,5 +1,25 @@
 (function () {
+    gsap.registerPlugin(ScrollTrigger);
     "use strict";
+
+    let isLocked = true;
+
+    function stopScroll(e) {
+        if (isLocked) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }
+
+    // block all scroll types
+    window.addEventListener("wheel", stopScroll, { passive: false });
+    window.addEventListener("touchmove", stopScroll, { passive: false });
+    window.addEventListener("keydown", function (e) {
+        if (isLocked && ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Space"].includes(e.code)) {
+            e.preventDefault();
+        }
+    }, false);
 
     if (window.matchMedia("(max-width: 900px)").matches) return;
 
@@ -128,7 +148,13 @@
 
         /* 2. Title slides to final position */
         tl.to(title, {
-            x: 0, y: 0, duration: 1.2, ease: "expo.inOut",
+            x: 0,
+            y: 0,
+            duration: 1.2,
+            ease: "expo.inOut",
+            onComplete: function () {
+                isLocked = false;
+            }
         }, "-=0.10");
 
         tl.addLabel("reveal", "-=0.20");
@@ -186,4 +212,40 @@
         requestAnimationFrame(function () { requestAnimationFrame(init); });
     }
 
+    function initScrollExit() {
+        var hero = document.querySelector(".eislab-hero");
+        var left = document.querySelector(".hero-left");
+        var right = document.querySelector(".hero-right");
+
+        if (!hero || !left || !right) return;
+
+        gsap.set([left, right], {
+            transformOrigin: "center center"
+        });
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: hero,
+                start: "top top",
+                end: "bottom top",
+                scrub: 1,
+            }
+        })
+            .to(left, {
+                xPercent: -100,
+                yPercent: -0,
+                rotation: -45,
+                scale: 0.9,
+                ease: "power2.inOut"
+            }, 0)
+            .to(right, {
+                xPercent: 100,
+                yPercent: -0,
+                rotation: 45,
+                scale: 0.9,
+                ease: "power2.inOut"
+            }, 0);
+    }
+    initScrollExit();
+    ScrollTrigger.refresh();
 })();
+

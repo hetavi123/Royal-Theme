@@ -6,13 +6,14 @@
     position: relative;
     display: flex;
     height: 100vh;
+    min-height: unset;
     overflow: hidden;
+    background: #fbfaf9;
 }
 
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: #fbfaf9;
     z-index: 50;
     pointer-events: none;
     display: none;

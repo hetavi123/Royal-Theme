@@ -8,7 +8,13 @@
         "cta_primary_label": "Shop Now",
         "cta_primary_url": "/collections/all"
       }
+    },
+    "scroll_section": {
+      "type": "eislab-scroll-section"
+    },
+    "fullscreen_images": {
+      "type": "fullscreen-images"
     }
   },
-  "order": [ "hero"]
+ "order": ["hero", "scroll_section", "fullscreen_images"]
 }

@@ -1,0 +1,608 @@
+{% comment %}
+  ═══════════════════════════════════════════════════════════
+  EISLAB · Scroll-Driven Arc Statements Section
+  File: sections/eislab-scroll-section.liquid
+
+  STEP-BY-STEP CHOREOGRAPHY:
+  ─────────────────────────────────────────────────────────
+  STEP 1  Text centred · img0 (left-bottom) visible on load
+  STEP 2  Scroll → arc1 from right · img1 right-bottom enters
+                               · img2 left-bottom enters
+          → img1 (right) exits upward on scroll
+  STEP 3  Text stays centre · img3 right-bottom appears
+  STEP 4  Text exits left   · img2 + img3 go bottom→top (cinematic)
+                            · img4 left enters
+  STEP 5  Scroll → arc2 from right-bottom → settles centre
+                 · img5 enters with text · img4 exits left
+                 · CTA fades in
+  ─────────────────────────────────────────────────────────
+{% endcomment %}
+{%- liquid
+  assign nav_tagline = section.settings.nav_tagline | default: 'How Ice Cream Should Be Today'
+  assign cta_label = section.settings.cta_label | default: 'ABOUT US'
+  assign cta_url = section.settings.cta_url | default: '/pages/about'
+  assign bg_color = section.settings.bg_color | default: '#F0EBE3'
+  assign ink_color = section.settings.ink_color | default: '#16175A'
+-%}
+
+<style>
+  #eis-section-{{ section.id }} {
+    --eis-bg:     {{ bg_color }};
+    --eis-ink:    {{ ink_color }};
+    --eis-shadow: rgba(22, 23, 90, 0.13);
+    background: var(--eis-bg);
+    color: var(--eis-ink);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Grain overlay */
+  #eis-section-{{ section.id }}::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.038;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px;
+  }
+
+  /* Sticky viewport */
+  .eis-sticky-vp-{{ section.id }} {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  /* NAV */
+  .eis-nav-{{ section.id }} {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 2.2vh, 26px) clamp(20px, 2.5vw, 36px);
+  }
+  .eis-nav-tag-{{ section.id }} {
+    font-size: 22px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--eis-ink);
+    opacity: 0.9;
+    font-weight: 400;
+  }
+
+  /*
+    ── SINGLE FULL-VIEWPORT SVG ──────────────────────────────────────
+    One SVG covers the whole sticky pane.
+    All three headlines share the SAME two <path> rails inside it.
+    Text moves by sliding startOffset — not by moving the element.
+  */
+  .eis-arc-svg-{{ section.id }} {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: visible;
+  }
+
+  /* Image cards */
+  .eis-img-card-{{ section.id }} {
+    position: absolute;
+    overflow: hidden;
+    will-change: transform, opacity;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06), 0 14px 52px var(--eis-shadow);
+    z-index: 5;
+    border-radius: 3px;
+  }
+  .eis-img-card-{{ section.id }} img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  /* Resting positions */
+  #eis-img0-{{ section.id }} { left: 5vw;   bottom: 12vh; width: clamp(130px,15vw,250px); height: clamp(185px,22vw,370px); }
+  #eis-img1-{{ section.id }} { right: 5vw;  bottom: 10vh; width: clamp(150px,18vw,300px); height: clamp(190px,23vw,380px); }
+  #eis-img2-{{ section.id }} { left: 6vw;   bottom: 42vh; width: clamp(145px,17vw,280px); height: clamp(175px,21vw,350px); }
+  #eis-img3-{{ section.id }} { right: 8vw;  bottom: 10vh; width: clamp(145px,17vw,290px); height: clamp(180px,22vw,360px); }
+  #eis-img4-{{ section.id }} { left: 7vw;    bottom: 12vh; top: auto;    width: clamp(140px,16vw,270px); height: clamp(175px,21vw,350px); }
+  #eis-img5-{{ section.id }} { right: 10vw; bottom: 10vh; width: clamp(145px,17vw,290px); height: clamp(180px,22vw,360px); }
+
+  /* Placeholder */
+  .eis-img-ph-{{ section.id }} {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg,#e8e3db 0%,#d0c9c0 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .eis-img-ph-{{ section.id }} span {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(8px,1vw,12px);
+    letter-spacing: 3px;
+    color: var(--eis-ink); opacity: 0.3;
+  }
+
+  /* CTA */
+  .eis-cta-wrap-{{ section.id }} {
+    position: absolute;
+    bottom: 7vh; left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .eis-cta-btn-{{ section.id }} {
+    font-family: 'DM Sans', sans-serif;
+    border: 1.5px solid var(--eis-ink);
+    background: transparent;
+    color: var(--eis-ink);
+    font-size: clamp(9px,0.85vw,11px);
+    letter-spacing: 4px;
+    padding: 12px 40px;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.22s ease, color 0.22s ease;
+    pointer-events: auto;
+  }
+  .eis-cta-btn-{{ section.id }}:hover {
+    background: var(--eis-ink);
+    color: var(--eis-bg);
+  }
+</style>
+
+<section id="eis-section-{{ section.id }}">
+  <div class="eis-scroll-driver-{{ section.id }}">
+    <div class="eis-sticky-vp-{{ section.id }}">
+      <!-- NAV -->
+      <nav class="eis-nav-{{ section.id }}">
+        <div class="eis-nav-tag-{{ section.id }}">{{ nav_tagline }}</div>
+      </nav>
+
+      <!--
+        ── SINGLE ARC SVG ─────────────────────────────────────────────
+        viewBox matches a 1440×900 coordinate space (16:9).
+        preserveAspectRatio="xMidYMid meet" scales it to fill the pane.
+
+        Arc geometry (circle centre at (720, 1600), below screen):
+          Radius A = 1250 → crown at y = 1600-1250 = 350  (upper-third) ✓
+          Radius B = 1100 → crown at y = 1600-1100 = 500  (mid, 150px below A) ✓
+
+        Both paths enter/exit at y=960 (just below viewport bottom).
+        All six textPaths reference ONLY these two paths — one rail for all three headlines.
+
+        startOffset "50%" with text-anchor="middle" = text centred at arc crown (x=720).
+        Headlines are staggered 100% apart and each travels -300% total:
+          H1:  100% → -200%   (centred at ~16% of scroll)
+          H2:  200% → -100%   (centred at ~50% of scroll)
+          H3:  300% →    0%   (centred at ~83% of scroll)
+      -->
+      <svg
+        class="eis-arc-svg-{{ section.id }}"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <defs>
+          <!-- RAIL A: crown at y≈350 (line 1 of every headline) -->
+          <path
+            id="eis-railA-{{ section.id }}"
+            d="M -354,960 A 1250,1250 0 0,1 1794,960"
+            fill="none"/>
+
+          <!-- RAIL B: crown at y≈500 (line 2 of every headline) -->
+          <path
+            id="eis-railB-{{ section.id }}"
+            d="M -175,960 A 1100,1100 0 0,1 1615,960"
+            fill="none"/>
+        </defs>
+
+        <!-- ── HEADLINE 1 ── startOffset="100%" → parked off-screen right -->
+        <text font-family="'Bebas Neue', sans-serif" font-size="140" fill="{{ ink_color }}" letter-spacing="1" font-weight="800">
+          <textPath
+            id="eis-h1l1-{{ section.id }}"
+            href="#eis-railA-{{ section.id }}"
+            startOffset="100%"
+            text-anchor="middle">
+            {{ section.blocks[0].settings.line1 | default: 'OUR PRODUCTION IS' | upcase }}
+          </textPath>
+        </text>
+        <text font-family="'Bebas Neue', sans-serif" font-size="140" fill="{{ ink_color }}" letter-spacing="1" font-weight="800">
+          <textPath
+            id="eis-h1l2-{{ section.id }}"
+            href="#eis-railB-{{ section.id }}"
+            startOffset="100%"
+            text-anchor="middle">
+            {{ section.blocks[0].settings.line2 | default: 'ENVIRONMENTALLY FRIENDLY' | upcase }}
+          </textPath>
+        </text>
+
+        <!-- ── HEADLINE 2 ── startOffset="200%" → parked further right -->
+        <text font-family="'Bebas Neue', sans-serif" font-size="140" fill="{{ ink_color }}" letter-spacing="1" font-weight="800">
+          <textPath
+            id="eis-h2l1-{{ section.id }}"
+            href="#eis-railA-{{ section.id }}"
+            startOffset="200%"
+            text-anchor="middle">
+            {{ section.blocks[1].settings.line1 | default: 'EVERY CUP IS MADE FROM' | upcase }}
+          </textPath>
+        </text>
+        <text font-family="'Bebas Neue', sans-serif" font-size="140" fill="{{ ink_color }}" letter-spacing="1" font-weight="800">
+          <textPath
+            id="eis-h2l2-{{ section.id }}"
+            href="#eis-railB-{{ section.id }}"
+            startOffset="200%"
+            text-anchor="middle">
+            {{ section.blocks[1].settings.line2 | default: 'HIGH-QUALITY INGREDIENTS' | upcase }}
+          </textPath>
+        </text>
+
+        <!-- ── HEADLINE 3 ── startOffset="300%" → parked furthest right -->
+        <text font-family="'Bebas Neue', sans-serif" font-size="140" fill="{{ ink_color }}" letter-spacing="1" font-weight="800">
+          <textPath
+            id="eis-h3l1-{{ section.id }}"
+            href="#eis-railA-{{ section.id }}"
+            startOffset="300%"
+            text-anchor="middle">
+            {{ section.blocks[2].settings.line1 | default: 'A DELIGHT FOR' | upcase }}
+          </textPath>
+        </text>
+        <text font-family="'Bebas Neue', sans-serif" font-size="140" fill="{{ ink_color }}" letter-spacing="1" font-weight="800">
+          <textPath
+            id="eis-h3l2-{{ section.id }}"
+            href="#eis-railB-{{ section.id }}"
+            startOffset="300%"
+            text-anchor="middle">
+            {{ section.blocks[2].settings.line2 | default: 'EVERYONE' | upcase }}
+          </textPath>
+        </text>
+      </svg>
+      <!-- /arc svg -->
+
+      <!-- IMG 0 — Step 1 · left-bottom (visible on load) -->
+      <div class="eis-img-card-{{ section.id }}" id="eis-img0-{{ section.id }}">
+        {%- if section.blocks[0].settings.image != blank -%}
+          <img
+            src="{{ section.blocks[0].settings.image | image_url: width: 500 }}"
+            srcset="{{ section.blocks[0].settings.image | image_url: width: 300 }} 300w, {{ section.blocks[0].settings.image | image_url: width: 500 }} 500w"
+            sizes="(max-width:768px) 140px, 250px"
+            alt="{{ section.blocks[0].settings.image.alt | default: 'Eislab product' }}"
+            loading="lazy"
+            width="250"
+            height="370"
+          >
+        {%- else -%}
+          <div class="eis-img-ph-{{ section.id }}"><span>EISLAB</span></div>
+        {%- endif -%}
+      </div>
+
+      <!-- IMG 1 — Step 2 · right-bottom (enters, then exits up) -->
+      <div class="eis-img-card-{{ section.id }}" id="eis-img1-{{ section.id }}">
+        {%- if section.blocks[1].settings.image != blank -%}
+          <img
+            src="{{ section.blocks[1].settings.image | image_url: width: 600 }}"
+            srcset="{{ section.blocks[1].settings.image | image_url: width: 360 }} 360w, {{ section.blocks[1].settings.image | image_url: width: 600 }} 600w"
+            sizes="(max-width:768px) 160px, 300px"
+            alt="{{ section.blocks[1].settings.image.alt | default: 'Eislab product' }}"
+            loading="lazy"
+            width="300"
+            height="380"
+          >
+        {%- else -%}
+          <div class="eis-img-ph-{{ section.id }}"><span>EISLAB</span></div>
+        {%- endif -%}
+      </div>
+
+      <!-- IMG 2 — Step 2 · left-mid (enters, stays through Step 3, exits Step 4) -->
+      <div class="eis-img-card-{{ section.id }}" id="eis-img2-{{ section.id }}">
+        {%- if section.blocks[1].settings.image2 != blank -%}
+          <img
+            src="{{ section.blocks[1].settings.image2 | image_url: width: 560 }}"
+            srcset="{{ section.blocks[1].settings.image2 | image_url: width: 340 }} 340w, {{ section.blocks[1].settings.image2 | image_url: width: 560 }} 560w"
+            sizes="(max-width:768px) 155px, 280px"
+            alt="{{ section.blocks[1].settings.image2.alt | default: 'Eislab product' }}"
+            loading="lazy"
+            width="280"
+            height="350"
+          >
+        {%- else -%}
+          <div class="eis-img-ph-{{ section.id }}"><span>EISLAB</span></div>
+        {%- endif -%}
+      </div>
+
+      <!-- IMG 3 — Step 3 · right-bottom (appears, exits Step 4) -->
+      <div class="eis-img-card-{{ section.id }}" id="eis-img3-{{ section.id }}">
+        {%- if section.blocks[2].settings.image != blank -%}
+          <img
+            src="{{ section.blocks[2].settings.image | image_url: width: 580 }}"
+            srcset="{{ section.blocks[2].settings.image | image_url: width: 350 }} 350w, {{ section.blocks[2].settings.image | image_url: width: 580 }} 580w"
+            sizes="(max-width:768px) 155px, 290px"
+            alt="{{ section.blocks[2].settings.image.alt | default: 'Eislab product' }}"
+            loading="lazy"
+            width="290"
+            height="360"
+          >
+        {%- else -%}
+          <div class="eis-img-ph-{{ section.id }}"><span>EISLAB</span></div>
+        {%- endif -%}
+      </div>
+
+      <!-- IMG 4 — Step 4 · left (enters from left, exits Step 5) -->
+      <div class="eis-img-card-{{ section.id }}" id="eis-img4-{{ section.id }}">
+        {%- if section.blocks[2].settings.image2 != blank -%}
+          <img
+            src="{{ section.blocks[2].settings.image2 | image_url: width: 540 }}"
+            srcset="{{ section.blocks[2].settings.image2 | image_url: width: 330 }} 330w, {{ section.blocks[2].settings.image2 | image_url: width: 540 }} 540w"
+            sizes="(max-width:768px) 150px, 270px"
+            alt="{{ section.blocks[2].settings.image2.alt | default: 'Eislab product' }}"
+            loading="lazy"
+            width="270"
+            height="350"
+          >
+        {%- else -%}
+          <div class="eis-img-ph-{{ section.id }}"><span>EISLAB</span></div>
+        {%- endif -%}
+      </div>
+
+      <!-- IMG 5 — Step 5 · right-bottom (enters with final text) -->
+      <div class="eis-img-card-{{ section.id }}" id="eis-img5-{{ section.id }}">
+        {%- if section.blocks[3].settings.image != blank -%}
+          <img
+            src="{{ section.blocks[3].settings.image | image_url: width: 580 }}"
+            srcset="{{ section.blocks[3].settings.image | image_url: width: 350 }} 350w, {{ section.blocks[3].settings.image | image_url: width: 580 }} 580w"
+            sizes="(max-width:768px) 155px, 290px"
+            alt="{{ section.blocks[3].settings.image.alt | default: 'Eislab product' }}"
+            loading="lazy"
+            width="290"
+            height="360"
+          >
+        {%- else -%}
+          <div class="eis-img-ph-{{ section.id }}"><span>EISLAB</span></div>
+        {%- endif -%}
+      </div>
+
+      <!-- CTA (fades in at the end) -->
+      <div class="eis-cta-wrap-{{ section.id }}" id="eis-cta-{{ section.id }}">
+        <a href="{{ cta_url }}" class="eis-cta-btn-{{ section.id }}">{{ cta_label }}</a>
+      </div>
+    </div>
+    <!-- /sticky-vp -->
+  </div>
+  <!-- /scroll-driver -->
+</section>
+
+<script>
+  (function () {
+    'use strict';
+    var SID = '{{ section.id }}';
+
+    function init() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+        requestAnimationFrame(init);
+        return;
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      function $id(id) {
+        return document.getElementById(id + '-' + SID);
+      }
+
+      var img0 = $id('eis-img0'),
+        img1 = $id('eis-img1'),
+        img2 = $id('eis-img2'),
+        img3 = $id('eis-img3'),
+        img4 = $id('eis-img4'),
+        img5 = $id('eis-img5'),
+        cta = $id('eis-cta');
+
+      var H = window.innerHeight;
+      var W = window.innerWidth;
+
+      /* INITIAL STATES */
+      gsap.set(img0, { opacity: 1 });
+
+      gsap.set(img1, { x: W * 0.5, y: H });
+      gsap.set(img2, { x: -W * 0.5, y: H });
+      gsap.set(img3, { x: W * 0.5, y: H });
+
+      gsap.set(img4, { x: -W }); // left entry
+      gsap.set(img5, { x: W * 0.5, y: H });
+
+      gsap.set(cta, { opacity: 0 });
+
+      /* TEXT START */
+      gsap.set($id('eis-h1l1'), { attr: { startOffset: '100%' } });
+      gsap.set($id('eis-h1l2'), { attr: { startOffset: '100%' } });
+      gsap.set($id('eis-h2l1'), { attr: { startOffset: '200%' } });
+      gsap.set($id('eis-h2l2'), { attr: { startOffset: '200%' } });
+      gsap.set($id('eis-h3l1'), { attr: { startOffset: '300%' } });
+      gsap.set($id('eis-h3l2'), { attr: { startOffset: '300%' } });
+
+      var tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#eis-section-' + SID,
+          start: 'top top',
+          end: '+=900%',
+          scrub: 3,
+          pin: '.eis-sticky-vp-' + SID,
+        },
+      });
+
+      /* TEXT ANIMATION */
+      tl.to(
+        [$id('eis-h1l1'), $id('eis-h1l2')],
+        {
+          attr: { startOffset: '-200%' },
+          duration: 9,
+          ease: 'none',
+        },
+        0
+      );
+
+      tl.to(
+        [$id('eis-h2l1'), $id('eis-h2l2')],
+        {
+          attr: { startOffset: '-100%' },
+          duration: 9,
+          ease: 'none',
+        },
+        0
+      );
+
+      /* FINAL TEXT → STOP CENTER */
+      tl.to(
+        [$id('eis-h3l1'), $id('eis-h3l2')],
+        {
+          attr: { startOffset: '50%' },
+          duration: 7,
+          ease: 'power2.out',
+        },
+        2.5
+      );
+
+      /* ================= STEP 1 → 2 ================= */
+      tl.to(img0, { y: -H * 0.9, duration: 1.2 }, 0.3);
+
+      tl.to(img1, { x: 0, y: 0, duration: 1.6 }, 0.8);
+      tl.to(img2, { x: 0, y: 0, duration: 1.6 }, 1.0);
+
+      tl.to(img1, { y: -H, duration: 1.4 }, 2.4);
+
+      /* ================= STEP 3 ================= */
+      tl.to(img3, { x: 0, y: 0, duration: 1.4 }, 3.0);
+
+      /* ================= STEP 4 ================= */
+      tl.to(
+        [img2, img3],
+        {
+          y: -H,
+          duration: 1.6,
+        },
+        4.5
+      );
+
+      /* img4 enters from LEFT → sits bottom-left */
+      tl.to(
+        img4,
+        {
+          x: 0,
+          duration: 1.4,
+        },
+        5.0
+      );
+
+      /* ================= STEP 5 ================= */
+      /* img4 exits BOTTOM → TOP (FIXED) */
+      tl.to(
+        img4,
+        {
+          y: -H,
+          duration: 1.6,
+        },
+        6.2
+      );
+
+      /* img5 enters bottom-right */
+      tl.to(
+        img5,
+        {
+          x: 0,
+          y: 0,
+          duration: 1.8,
+        },
+        6.2
+      );
+
+      /* CTA */
+      tl.to(
+        cta,
+        {
+          opacity: 1,
+          duration: 1,
+        },
+        7
+      );
+
+      ScrollTrigger.refresh();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Eislab Scroll Arc",
+  "tag": "div",
+  "class": "eislab-scroll-section",
+  "max_blocks": 4,
+  "settings": [
+    { "type": "header", "content": "Navigation" },
+    { "type": "text", "id": "nav_tagline", "label": "Top tagline", "default": "How Ice Cream Should Be Today" },
+    { "type": "header", "content": "CTA Button" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "ABOUT US" },
+    { "type": "url", "id": "cta_url", "label": "Button URL" },
+    { "type": "header", "content": "Colours" },
+    { "type": "color", "id": "bg_color", "label": "Background colour", "default": "#F0EBE3" },
+    { "type": "color", "id": "ink_color", "label": "Text / ink colour", "default": "#16175A" }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "header", "content": "Arc Headline" },
+        {
+          "type": "text",
+          "id": "line1",
+          "label": "Headline — line 1",
+          "default": "OUR PRODUCTION IS",
+          "info": "All caps applied automatically."
+        },
+        {
+          "type": "text",
+          "id": "line2",
+          "label": "Headline — line 2",
+          "default": "ENVIRONMENTALLY FRIENDLY",
+          "info": "All caps applied automatically."
+        },
+        { "type": "header", "content": "Images" },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Primary image",
+          "info": "Slide 1: left-bottom. Slide 2: right-bottom. Slide 3: right-bottom. Slide 4: right-bottom."
+        },
+        {
+          "type": "image_picker",
+          "id": "image2",
+          "label": "Secondary image",
+          "info": "Slide 2: left-mid. Slide 3: left-top. Not used on slides 1 & 4."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Eislab Scroll Arc",
+      "blocks": [
+        { "type": "slide", "settings": { "line1": "OUR PRODUCTION IS", "line2": "ENVIRONMENTALLY FRIENDLY" } },
+        { "type": "slide", "settings": { "line1": "EVERY CUP IS MADE FROM", "line2": "HIGH-QUALITY INGREDIENTS" } },
+        { "type": "slide", "settings": { "line1": "A DELIGHT FOR", "line2": "EVERYONE" } },
+        { "type": "slide", "settings": { "line1": "CRAFTED WITH", "line2": "LOVE & PASSION" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
